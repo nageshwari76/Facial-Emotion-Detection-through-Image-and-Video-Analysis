@@ -1,0 +1,168 @@
+{% extends 'emotion_app/base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container hero-inner">
+        <div class="hero-text">
+            <span class="badge">AI-Powered • Real-Time • Web-Based</span>
+            <h1>Understand Emotions,<br> at  Real Time</h1>
+            <p>
+                <strong>Facial Emotion Detection Through Image and Video Analysis</strong> — an intelligent
+                web application that reads human emotions from a webcam or photo using OpenCV and a
+                pre-trained Deep Learning model, then responds with personalized support, motivation
+                and activity suggestions.
+            </p>
+            <div class="hero-actions">
+                <a href="{% url 'user_register' %}" class="btn btn-primary btn-lg">Get Started</a>
+                <a href="#features" class="btn btn-light btn-lg">Explore Features</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="emotion-orbit" aria-hidden="true">
+                <span class="orbit-face">🙂</span>
+                <span class="orbit-chip c1">😊 Happy</span>
+                <span class="orbit-chip c2">😢 Sad</span>
+                <span class="orbit-chip c3">😠 Angry</span>
+                <span class="orbit-chip c4">😨 Fear</span>
+                <span class="orbit-chip c5">😲 Surprise</span>
+                <span class="orbit-chip c6">🤢 Disgust</span>
+                <span class="orbit-chip c7">😐 Neutral</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+    <div class="container">
+        <div class="section-head">
+            <span class="badge badge-accent">Why EmoCare AI?</span>
+            <h2>Everything You Need to <span class="grad-text">Read Emotions</span></h2>
+            <p>Seven emotions detected in real time with an intelligent, human response for every mood.</p>
+        </div>
+        <div class="cards-grid">
+            <div class="card feature-card">
+                <div class="feature-icon">🎥</div>
+                <h3>Real-Time Webcam Detection</h3>
+                <p>Point your camera and get instant emotion analysis powered by OpenCV face detection.</p>
+            </div>
+            <div class="card feature-card">
+                <div class="feature-icon">🖼️</div>
+                <h3>Image Upload</h3>
+                <p>Upload any photo and the Vision Transformer (ViT) model classifies the emotion with ~70% accuracy.</p>
+            </div>
+            <div class="card feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>Personalized AI Messages</h3>
+                <p>Plug in your own Gemini or ChatGPT API key to receive motivational messages and support.</p>
+            </div>
+            <div class="card feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>Admin Control Panel</h3>
+                <p>Admins activate/deactivate users, delete accounts and view full dataset statistics.</p>
+            </div>
+            <div class="card feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Dataset Dashboard</h3>
+                <p>Explore the FER2013 dataset with per-emotion train/test image counts.</p>
+            </div>
+            <div class="card feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Fully Responsive</h3>
+                <p>Works beautifully on desktop, tablet and mobile with a clean light theme.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- EMOTIONS -->
+<section class="section section-tint" id="emotions">
+    <div class="container">
+        <div class="section-head">
+            <span class="badge badge-accent">7 Emotions</span>
+            <h2>What We Can <span class="grad-text">Detect</span></h2>
+        </div>
+        <div class="emotion-grid">
+            <div class="emotion-card" style="--ec:#facc15;"><span>😊</span><h4>Happy</h4></div>
+            <div class="emotion-card" style="--ec:#3b82f6;"><span>😢</span><h4>Sad</h4></div>
+            <div class="emotion-card" style="--ec:#ef4444;"><span>😠</span><h4>Angry</h4></div>
+            <div class="emotion-card" style="--ec:#f59e0b;"><span>😨</span><h4>Fear</h4></div>
+            <div class="emotion-card" style="--ec:#ec4899;"><span>😲</span><h4>Surprise</h4></div>
+            <div class="emotion-card" style="--ec:#8b5cf6;"><span>🤢</span><h4>Disgust</h4></div>
+            <div class="emotion-card" style="--ec:#64748b;"><span>😐</span><h4>Neutral</h4></div>
+        </div>
+    </div>
+</section>
+
+<!-- MODEL ACCURACY -->
+<section class="section" id="model">
+    <div class="container">
+        <div class="section-head">
+            <span class="badge badge-accent">AI Model</span>
+            <h2>Powered by <span class="grad-text">Vision Transformer</span></h2>
+            <p>Our ViT model achieves ~70% accuracy on the FER2013 test set.</p>
+        </div>
+        <div class="stat-grid">
+            <div class="stat-card stat-green">
+                <span class="stat-num">~70%</span>
+                <span class="stat-label">Test Accuracy</span>
+            </div>
+            <div class="stat-card stat-blue">
+                <span class="stat-num">7</span>
+                <span class="stat-label">Emotion Classes</span>
+            </div>
+            <div class="stat-card stat-amber">
+                <span class="stat-num">~94%</span>
+                <span class="stat-label">Face Detection Rate</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how-it-works">
+    <div class="container">
+        <div class="section-head">
+            <span class="badge badge-accent">Simple Process</span>
+            <h2>How It <span class="grad-text">Works</span></h2>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h4>Register &amp; Login</h4>
+                <p>Create an account. The admin approves your registration before first login.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h4>Capture or Upload</h4>
+                <p>Use your webcam live or upload an image of a face.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h4>AI Detects Emotion</h4>
+                <p>OpenCV finds the face, the Vision Transformer (ViT) model classifies one of 7 emotions with ~70% accuracy.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <h4>Get Support</h4>
+                <p>Receive a motivational message from your configured Gemini/ChatGPT API.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+    <div class="container cta-inner">
+        <h2>Ready to see how you feel today?</h2>
+        <p>Join EmoCare AI and start monitoring your emotions in real time — for free.</p>
+        <div class="hero-actions">
+            <a href="{% url 'user_register' %}" class="btn btn-light btn-lg">Create Account</a>
+            <a href="{% url 'user_login' %}" class="btn btn-outline-light btn-lg">User Login</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

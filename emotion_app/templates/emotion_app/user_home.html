@@ -1,0 +1,97 @@
+{% extends 'emotion_app/base.html' %}
+{% load static %}
+{% load emotion_extras %}
+{% block title %}User Dashboard{% endblock %}
+{% block content %}
+
+<section class="section">
+    <div class="container">
+        <div class="dash-head">
+            <div>
+                <h1>Hello, {{ user.username }}! 👋</h1>
+                <p class="muted">Detect your emotion live or upload a photo, then receive a personalized message.</p>
+            </div>
+            <a href="{% url 'user_logout' %}" class="btn btn-outline">Logout</a>
+        </div>
+
+        <div class="dash-grid">
+            <!-- Camera / upload -->
+            <div class="card panel">
+                <h3>🎥 Emotion Scanner</h3>
+
+                <div class="video-wrap">
+                    <video id="video" autoplay playsinline muted></video>
+                    <div class="video-placeholder" id="videoPlaceholder">Click "Start Camera" to begin</div>
+                </div>
+
+                <div class="camera-controls">
+                    <button id="btnStart" class="btn btn-primary">▶ Start Camera</button>
+                    <button id="btnStop" class="btn btn-outline" disabled>⏹ Stop Camera</button>
+                    <button id="btnCapture" class="btn btn-accent" disabled>📸 Capture</button>
+                </div>
+
+                <div class="upload-box">
+                    <label for="imageInput" class="btn btn-light btn-block">🖼️ Or upload an image</label>
+                    <input type="file" id="imageInput" accept="image/*" hidden>
+                </div>
+
+                <div id="status" class="status" hidden>
+                    <div class="spinner"></div>
+                    <span id="statusText">Analyzing…</span>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div class="card panel result-panel">
+                <h3>🧠 Detection Result</h3>
+                <div class="captured-wrap" id="capturedWrap" hidden>
+                    <img id="capturedImage" alt="Captured image">
+                </div>
+                <div class="result-empty" id="resultEmpty">
+                    <p>Your detected emotion will appear here.</p>
+                </div>
+                <div class="result-body" id="resultBody" hidden>
+                    <div class="face-count" id="resFaceCount" hidden></div>
+                    <div class="result-emotion">
+                        <span class="result-emoji" id="resEmoji">😊</span>
+                        <h2 id="resEmotion" class="grad-text">Happy</h2>
+                    </div>
+                    <div class="confidence" id="resConfBox">
+                        <div class="confidence-label"><span>Confidence</span><span id="resConf">0%</span></div>
+                        <div class="bar"><div class="bar-fill" id="resBar" style="width:0%"></div></div>
+                    </div>
+                    <ul class="face-list" id="resFaceList" hidden></ul>
+                    <div class="message-box" id="resMessage">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History -->
+        {% if records %}
+        <div class="card panel history">
+            <h3>📜 Recent Detections</h3>
+            <div class="history-grid">
+                {% for r in records %}
+                <div class="history-item">
+                    {% if r.image %}
+                    <a href="{{ r.image.url }}" target="_blank" rel="noopener" title="Open image">
+                        <img class="history-thumb" src="{{ r.image.url }}" alt="{{ r.emotion|emotion_label }}" loading="lazy">
+                    </a>
+                    {% endif %}
+                    <div class="history-emoji">{{ r.emotion|emotion_emoji }}</div>
+                    <div>
+                        <strong>{{ r.emotion|emotion_label }}</strong>
+                        <div class="muted">{% if r.emotion == 'no_face' %}Invalid image{% else %}{{ r.confidence|floatformat:1 }}%{% endif %} • {{ r.created_at|date:"M d, H:i" }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/camera.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,366 @@
+{% extends 'emotion_app/base.html' %}
+{% load static %}
+{% block title %}Admin Panel{% endblock %}
+{% block content %}
+
+<section class="section">
+    <div class="container">
+        <div class="dash-head">
+            <div>
+                <h1>🛡️ Admin Panel</h1>
+                <p class="muted">Manage users, view dataset statistics and configure the AI API.</p>
+            </div>
+            <a href="{% url 'admin_logout' %}" class="btn btn-outline">Admin Logout</a>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs" role="tablist">
+            <button class="tab-btn {% if active_tab == 'dashboard' %}active{% endif %}" data-tab="dashboard">📊 Dashboard</button>
+            <button class="tab-btn {% if active_tab == 'users' %}active{% endif %}" data-tab="users">👥 Users</button>
+            <button class="tab-btn {% if active_tab == 'dataset' %}active{% endif %}" data-tab="dataset">🗂️ Dataset View</button>
+            <button class="tab-btn {% if active_tab == 'training' %}active{% endif %}" data-tab="training">🤖 Train Model</button>
+            <button class="tab-btn {% if active_tab == 'api' %}active{% endif %}" data-tab="api">🔑 API Settings</button>
+        </div>
+
+        <!-- Dashboard tab -->
+        <div class="tab-panel {% if active_tab == 'dashboard' %}active{% endif %}" id="tab-dashboard">
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="stat-num">{{ total_users }}</span>
+                    <span class="stat-label">Total Users</span>
+                </div>
+                <div class="stat-card stat-green">
+                    <span class="stat-num">{{ active_users }}</span>
+                    <span class="stat-label">Active Users</span>
+                </div>
+                <div class="stat-card stat-amber">
+                    <span class="stat-num">{{ inactive_users }}</span>
+                    <span class="stat-label">Pending Approval</span>
+                </div>
+                <div class="stat-card stat-blue">
+                    <span class="stat-num">{{ records_total }}</span>
+                    <span class="stat-label">Emotion Detections</span>
+                </div>
+            </div>
+            <div class="card panel">
+                <h3>⚡ Quick Actions</h3>
+                <p class="muted">Use the tabs above to activate/deactivate users, view the dataset or configure your API key.</p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary" data-goto="users">Manage Users</button>
+                    <button class="btn btn-accent" data-goto="dataset">View Dataset</button>
+                    <button class="btn btn-admin" data-goto="training">Train Model</button>
+                    <button class="btn btn-outline" data-goto="api">API Settings</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users tab -->
+        <div class="tab-panel {% if active_tab == 'users' %}active{% endif %}" id="tab-users">
+            <div class="card panel">
+                <h3>👥 User Management</h3>
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                                <th class="th-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            <tr>
+                                <td>
+                                    {{ u.username }}
+                                    {% if u.is_superuser %}<span class="chip chip-admin">ADMIN</span>{% endif %}
+                                </td>
+                                <td>{{ u.email|default:"—" }}</td>
+                                <td>{{ u.profile.phone|default:"—" }}</td>
+                                <td>
+                                    {% if u.is_superuser %}
+                                        <span class="chip chip-admin">Admin</span>
+                                    {% elif u.is_active %}
+                                        <span class="chip chip-active">Active</span>
+                                    {% else %}
+                                        <span class="chip chip-pending">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ u.date_joined|date:"M d, Y" }}</td>
+                                <td class="td-actions">
+                                    {% if not u.is_superuser %}
+                                        {% if u.is_active %}
+                                            <form method="post" action="{% url 'admin_user_action' %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                                <input type="hidden" name="action" value="deactivate">
+                                                <button type="submit" class="btn btn-outline btn-xs">Deactivate</button>
+                                            </form>
+                                        {% else %}
+                                            <form method="post" action="{% url 'admin_user_action' %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                                <input type="hidden" name="action" value="activate">
+                                                <button type="submit" class="btn btn-primary btn-xs">Activate</button>
+                                            </form>
+                                        {% endif %}
+                                        <form method="post" action="{% url 'admin_user_action' %}" onsubmit="return confirm('Delete user {{ u.username }}? This cannot be undone.');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="user_id" value="{{ u.id }}">
+                                            <input type="hidden" name="action" value="delete">
+                                            <button type="submit" class="btn btn-danger btn-xs">Delete</button>
+                                        </form>
+                                    {% else %}
+                                        <span class="muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="muted">No users registered yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dataset tab -->
+        <div class="tab-panel {% if active_tab == 'dataset' %}active{% endif %}" id="tab-dataset">
+            <div class="card panel">
+                <h3>🗂️ Dataset Information</h3>
+                <p class="muted">FER2013 emotion dataset — images organized by emotion class (train / test splits).</p>
+                <div class="stat-grid">
+                    <div class="stat-card stat-blue">
+                        <span class="stat-num">{{ dataset_total.train }}</span>
+                        <span class="stat-label">Training Images</span>
+                    </div>
+                    <div class="stat-card stat-green">
+                        <span class="stat-num">{{ dataset_total.test }}</span>
+                        <span class="stat-label">Testing Images</span>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Emotion</th>
+                                <th>Train Count</th>
+                                <th>Test Count</th>
+                                <th>Distribution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for emotion, counts in dataset_stats.items %}
+                            <tr>
+                                <td>{{ emotion|title }}</td>
+                                <td>{{ counts.train|default:0 }}</td>
+                                <td>{{ counts.test|default:0 }}</td>
+                                <td>
+                                    <div class="bar">
+                                        <div class="bar-fill bar-emotion" data-train="{{ counts.train|default:0 }}" style="width:0%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="muted">Dataset folder not found. Place the dataset inside the project folder.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training tab -->
+        <div class="tab-panel {% if active_tab == 'training' %}active{% endif %}" id="tab-training">
+            <div class="card panel">
+                <h3>🤖 Model Training <span class="muted">(per fer2013_mobilenetv2.ipynb)</span></h3>
+                <p class="muted">
+                    Retrain the MobileNetV2 model on the local <code>dataset/</code> folder exactly like the notebook —
+                    two-stage transfer learning (feature extraction → fine-tuning) with balanced class weights.
+                    Best weights are saved to <code>best_mobilenetv2_fer2013.h5</code> and used immediately by the app.
+                    Training runs in the background; graphs below update when it finishes.
+                </p>
+
+                <div class="stat-grid">
+                    <div class="stat-card {% if inference_model_exists %}stat-green{% else %}stat-amber{% endif %}">
+                        <span class="stat-num">{{ inference_model_exists|yesno:"Ready,Missing" }}</span>
+                        <span class="stat-label">Detection Model ({{ inference_model_name }})</span>
+                    </div>
+                    <div class="stat-card stat-blue">
+                        <span class="stat-num">{{ model_exists|yesno:"Ready,Missing" }}</span>
+                        <span class="stat-label">Retrain Target ({{ current_model }})</span>
+                    </div>
+                    <div class="stat-card stat-green">
+                        <span class="stat-num">~70%</span>
+                        <span class="stat-label">ViT Model Accuracy</span>
+                    </div>
+                    <div class="stat-card {% if training_status.status == 'running' %}stat-amber{% elif training_status.status == 'completed' %}stat-green{% endif %}">
+                        <span class="stat-num" id="trainStatusChip">{{ training_status.status|default:"idle"|title }}</span>
+                        <span class="stat-label">Training Status</span>
+                    </div>
+                    {% if training_status.metrics.test_accuracy %}
+                    <div class="stat-card stat-green">
+                        <span class="stat-num">{{ training_status.metrics.test_accuracy|floatformat:2 }}</span>
+                        <span class="stat-label">Last Test Accuracy</span>
+                    </div>
+                    {% endif %}
+                    {% if training_status.metrics.model_file %}
+                    <div class="stat-card stat-blue">
+                        <span class="stat-num stat-sm-num">{{ training_status.metrics.model_file }}</span>
+                        <span class="stat-label">Model Used</span>
+                    </div>
+                    {% endif %}
+                    {% if training_status.started_at %}
+                    <div class="stat-card">
+                        <span class="stat-num stat-sm-num">{{ training_status.started_at|slice:":16" }}</span>
+                        <span class="stat-label">Started At</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if model_files %}
+                <div class="form-group">
+                    <label for="modelSelect">Select .h5 Model to Evaluate</label>
+                    <select id="modelSelect" class="form-control">
+                        {% for mf in model_files %}
+                        <option value="{{ mf.name }}" {% if mf.name == current_model %}selected{% endif %}>
+                            {{ mf.name }} ({{ mf.size_mb }} MB)
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <small class="help-text">Choose which model file to evaluate or retrain. The selected file will be used when you click the buttons below.</small>
+                </div>
+                {% endif %}
+
+                <div class="form-row">
+                    <form method="post" action="{% url 'admin_evaluate_model' %}" id="evaluateForm" class="train-job-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="model_file" id="evalModelFile" value="{{ current_model }}">
+                        <button type="submit" class="btn btn-accent btn-lg" id="btnEvaluate" {% if training_status.status == 'running' %}disabled{% endif %}>
+                            ⚡ Use Existing h5
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'admin_train_model' %}" id="trainForm" class="train-job-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="model_file" id="trainModelFile" value="{{ current_model }}">
+                        <button type="submit" class="btn btn-admin btn-lg" id="btnTrain" {% if training_status.status == 'running' %}disabled{% endif %}>
+                            🚀 Run Model
+                        </button>
+                    </form>
+                </div>
+                <p class="muted" style="margin-top:12px;">
+                    <strong>⚡ Use Existing h5</strong> — instantly evaluates the selected model on the test set
+                    (no training, fast) and shows the bar chart, confusion matrix and pie chart.<br>
+                    <strong>🚀 Run Model</strong> — retrains from scratch per the notebook
+                    (two-stage, takes a long time on CPU; first run downloads ImageNet weights ~14 MB).
+                    Retraining always writes <code>best_mobilenetv2_fer2013.h5</code> — the high-accuracy
+                    <code>best_fer2013_vit.h5</code> used for detection is never overwritten.
+                </p>
+
+                <div class="train-progress" id="trainProgress" hidden>
+                    <div class="spinner"></div>
+                    <div>
+                        <strong id="trainMessage">Starting…</strong>
+                        <div class="progress-track"><div class="progress-fill" id="trainProgressBar" style="width:0%"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            {% if training_status.plots %}
+            <div class="card panel">
+                <h3>📈 Training Graphs</h3>
+                <div class="plot-grid">
+                    {% if 'training/training_curves.png' in training_status.plots %}
+                    <figure class="plot-figure">
+                        <img src="{{ MEDIA_URL }}training/training_curves.png" alt="Training & validation accuracy / loss curves">
+                        <figcaption>Training &amp; Validation Accuracy / Loss</figcaption>
+                    </figure>
+                    {% endif %}
+                    {% if 'training/confusion_matrix.png' in training_status.plots %}
+                    <figure class="plot-figure">
+                        <img src="{{ MEDIA_URL }}training/confusion_matrix.png" alt="Confusion matrix heatmap">
+                        <figcaption>Confusion Matrix (Test Set)</figcaption>
+                    </figure>
+                    {% endif %}
+                    {% if 'training/class_distribution.png' in training_status.plots %}
+                    <figure class="plot-figure">
+                        <img src="{{ MEDIA_URL }}training/class_distribution.png" alt="Class distribution bar chart">
+                        <figcaption>Class Distribution (Bar Chart)</figcaption>
+                    </figure>
+                    {% endif %}
+                    {% if 'training/class_distribution_pie.png' in training_status.plots %}
+                    <figure class="plot-figure">
+                        <img src="{{ MEDIA_URL }}training/class_distribution_pie.png" alt="Class distribution pie chart">
+                        <figcaption>Class Distribution (Pie Chart)</figcaption>
+                    </figure>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if training_status.report %}
+            <div class="card panel">
+                <h3>📋 Classification Report (Last Run)</h3>
+                <pre class="report-pre">{{ training_status.report }}</pre>
+            </div>
+            {% endif %}
+
+            {% if training_status.error %}
+            <div class="card panel">
+                <h3>⚠️ Last Training Error</h3>
+                <pre class="report-pre report-error">{{ training_status.error }}</pre>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- API tab -->
+        <div class="tab-panel {% if active_tab == 'api' %}active{% endif %}" id="tab-api">
+            <div class="card panel">
+                <h3>🔑 API Settings (Blank API Option)</h3>
+                <p class="muted">
+                    Plug in <strong>your own</strong> API key — Google Gemini or OpenAI ChatGPT.
+                    Once enabled, every detected emotion will return a personalized motivational message,
+                    emotional support, stress-relief suggestion and activity recommendation.
+                </p>
+
+                <form method="post" action="{% url 'admin_save_api' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_provider">API Provider</label>
+                        {{ api_form.provider }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_api_key">API Key (your own)</label>
+                        {{ api_form.api_key }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_model_name">Model Name <small class="muted">(optional)</small></label>
+                        {{ api_form.model_name }}
+                    </div>
+                    <div class="form-group form-check">
+                        {{ api_form.enabled }}
+                        <label for="id_enabled">Enable API messages</label>
+                    </div>
+                    <button type="submit" class="btn btn-admin">💾 Save API Settings</button>
+                </form>
+
+                <div class="api-help">
+                    <h4>How to get a key</h4>
+                    <ul>
+                        <li><strong>Gemini:</strong> <code>https://aistudio.google.com/apikey</code> — create a free API key.</li>
+                        <li><strong>OpenAI ChatGPT:</strong> <code>https://platform.openai.com/api-keys</code> — create a secret key (sk-…).</li>
+                    </ul>
+                    <p class="muted">When disabled or without a key, the app uses built-in fallback messages.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin_training.js' %}"></script>
+{% endblock %}

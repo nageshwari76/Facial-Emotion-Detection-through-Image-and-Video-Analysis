@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+
+# Model & dataset are provided assets (uncomment to track)
+# *.h5
+# dataset/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+# Large files (too big for GitHub)
+dataset/
+dataset.rar
+*.h5
+_backup_before_multiface/

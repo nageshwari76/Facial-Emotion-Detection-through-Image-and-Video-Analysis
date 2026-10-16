@@ -1,0 +1,28 @@
+{% extends 'emotion_app/base.html' %}
+{% block title %}Admin Login{% endblock %}
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card card admin-card">
+        <div class="auth-icon">🛡️</div>
+        <h2>Admin Login</h2>
+        <p class="muted">Restricted area — manage users and dataset information.</p>
+
+        {% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Admin Username</label>
+                <input type="text" id="username" name="username" class="form-control" required autofocus placeholder="admin">
+            </div>
+            <div class="form-group">
+                <label for="password">Admin Password</label>
+                <input type="password" id="password" name="password" class="form-control" required placeholder="••••••">
+            </div>
+            <button type="submit" class="btn btn-admin btn-block">Login to Admin Panel</button>
+        </form>
+
+        <p class="auth-alt"><a href="{% url 'home' %}">← Back to home</a></p>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EmoCare AI{% endblock %} | EmoCare AI</title>
+    <meta name="description" content="Facial Emotion Detection Through Image and Video Analysis - detect emotions in real time and get personalized support.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20261002">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="navbar">
+        <div class="container nav-inner">
+            <a href="{% url 'home' %}" class="brand">
+                <span class="brand-logo">😊</span>
+                <span class="brand-text">Facial Emotion Detector <em>AI</em></span>
+            </a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">☰</button>
+            <nav class="nav-links" id="navLinks">
+                <a href="{% url 'home' %}#features">Features</a>
+                <a href="{% url 'home' %}#emotions">Emotions</a>
+                <a href="{% url 'home' %}#how-it-works">How it works</a>
+                {% if user.is_authenticated %}
+                    {% if user.is_superuser %}
+                        <a href="{% url 'admin_home' %}">Admin Panel</a>
+                        <a class="btn btn-outline btn-sm" href="{% url 'admin_logout' %}">Admin Logout</a>
+                    {% else %}
+                        <a href="{% url 'user_home' %}" class="btn btn-primary btn-sm">User Dashboard</a>
+                        <a class="btn btn-outline btn-sm" href="{% url 'user_logout' %}">Logout</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'user_login' %}" class="btn btn-outline btn-sm">Login</a>
+                    <a href="{% url 'user_register' %}" class="btn btn-primary btn-sm">Register</a>
+                    <a href="{% url 'admin_login' %}" class="btn btn-ghost btn-sm">Admin</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        {% if messages %}
+            <div class="container">
+                {% for message in messages %}
+                    <div class="flash flash-{{ message.tags|default:'info' }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div>
+                <strong>Facial Emotion Detector</strong> — Facial Emotion Detection Through Image and Video Analysis
+            </div>
+            <div class="footer-links">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'user_register' %}">Register</a>
+                <a href="{% url 'user_login' %}">User Login</a>
+                <a href="{% url 'admin_login' %}">Admin Login</a>
+            </div>
+            <p class="footer-note">Built with Django, OpenCV &amp; Deep Learning (MobileNetV2). © {% now "Y" %} EmoCare AI.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+<script>
+/* mobile: stack wide tables (2026-10-02): on phones, tables with 5+ columns become one card per row (see the
+   .m-stack rules in the stylesheet); each cell gets its column heading as a label. */
+(function () {
+  document.querySelectorAll("table").forEach(function (table) {
+    var heads = table.querySelectorAll("thead th");
+    if (heads.length < 5 || table.classList.contains("m-stack")) return;
+    table.classList.add("m-stack");
+    table.querySelectorAll("tbody tr").forEach(function (row) {
+      Array.prototype.forEach.call(row.cells, function (cell, i) {
+        if (heads[i] && !cell.hasAttribute("colspan")) cell.setAttribute("data-label", heads[i].textContent.trim());
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{% extends 'emotion_app/base.html' %}
+{% block title %}User Login{% endblock %}
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card card">
+        <div class="auth-icon">🙂</div>
+        <h2>User Login</h2>
+        <p class="muted">Welcome back! Log in to detect your emotions.</p>
+
+        {% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required autofocus placeholder="Enter your username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required placeholder="Enter your password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+
+        <p class="auth-alt">New here? <a href="{% url 'user_register' %}">Create an account</a></p>
+        <p class="auth-alt"><a href="{% url 'home' %}">← Back to home</a></p>
+    </div>
+</section>
+{% endblock %}
